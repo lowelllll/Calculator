@@ -14,7 +14,7 @@ class  CalcClient2
 		System.out.println("2항식만 가능합니다. ex)1+1");
 	}
 
-	private void inputExp(){
+	private void inputExp () {
 		try{
 			inputBr = new BufferedReader(new InputStreamReader(System.in));
 			this.exp = inputBr.readLine();
@@ -54,7 +54,7 @@ class  CalcClient2
 		return false;
 	}
 
-	public void send() {
+	private void send() {
 		try{
 			bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 			br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -68,7 +68,7 @@ class  CalcClient2
 		}
 	}
 	
-	public void receive() {
+	private void receive() {
 		try{
 			String result = br.readLine();
 
@@ -79,7 +79,7 @@ class  CalcClient2
 	}
 	
 	// 계산결과 받음
-	public void closed(){
+	private void closed(){
 		try{
 			inputBr.close();
 			br.close();
