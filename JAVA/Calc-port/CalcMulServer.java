@@ -4,54 +4,86 @@ import java.net.*;
 class CalcMulServer 
 {
 	private ServerSocket server = null;
+	private Socket socket = null;
 
-	CalcMulServer () {
+	private BufferedWriter bw = null;
+	private	BufferedReader br = null;
+	private String exp;
+
+	CalcMulServer () throws IOException {
+		server = new ServerSocket(10003);
+	}
+	
+	private boolean connectSocket () {
+		boolean flag = false;
+		
 		try {
-			server = new ServerSocket(10003);
+			this.socket = server.accept();
+			System.out.println("연결 완료");
+			flag = true;
+			return flag;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			return flag;
 		}
-		catch (IOException e){
+	}
+
+	private void receive () throws IOException {
+		this.br = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+		this.exp = this.br.readLine();
+	}
+
+	private int calcuration () {
+		String[] numbers = this.exp.split("\\*");
+		
+		int result = Integer.parseInt(numbers[0]) * Integer.parseInt(numbers[1]);
+		return result;
+	}
+
+	private void send () throws IOException {
+		this.bw = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream()));
+		int result = calcuration();
+		this.bw.write(result+"\n"); // 결과값 전송
+		this.bw.flush();	
+	}
+
+	private void closed () throws IOException {
+		this.socket.close();
+		this.br.close();
+		this.bw.close();
+		
+		System.out.println("연결 끊음");
+	}
+	
+	public void process () throws Exception{
+		System.out.println("곱하기 연산 서버");
+		
+		while(true){
+			if(!connectSocket()) {
+				System.out.println("소켓 연결 실패");
+				continue;
+			}
+			receive();
+			send();
+			closed();
+		}
+	}
+	
+	public static void main(String[] args) {	
+		CalcMulServer mul = null;
+		
+		try {
+			 mul = new CalcMulServer();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			mul.process();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-
-	public void process () {
-		while(true){
-			try{
-				System.out.println("곱하기 연산 서버");
-				System.out.println("클라이언트와의 연결 기다리는 중..");
-
-				Socket socket = server.accept();
-				System.out.println("연결 완료");
-				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-				BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-				// 계산식을 받음
-				String exp = br.readLine();
-
-				String[] numbers = exp.split("\\*");
-
-				// 더하기 계산
-				int result = Integer.parseInt(numbers[0]) * Integer.parseInt(numbers[1]);
-				
-				// 결과 전송
-				bw.write(result+"\n");
-				bw.flush();
-				
-				// 연결 끊음.
-				br.close();
-				bw.close();
-				socket.close();
-				
-				System.out.println("연결 끊음");
-				
-			}catch(IOException e){
-				e.printStackTrace();
-			}
-		}
-	}
-	public static void main(String[] args) 
-	{
-		CalcMulServer mul = new CalcMulServer();
-		mul.process();
-	}
+	
 }
